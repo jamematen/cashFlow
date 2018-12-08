@@ -1,21 +1,17 @@
 {
-  "name": "electron-quick-start",
+  "name": "cashflow",
   "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "description": "A simple casflow over electron",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": "https://github.com/jamematen/cashflow.git",
   "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
+    "Electron"
   ],
-  "author": "GitHub",
-  "license": "CC0-1.0",
+  "author": "Rodolfo Santamaria",
+  "license": "MIT",
   "devDependencies": {
     "electron": "^3.0.7"
   },
