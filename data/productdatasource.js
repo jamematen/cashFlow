@@ -1,4 +1,4 @@
-﻿var products = [
+﻿ var products = [
     { ProductID: 1, ProductNumber: "AR-5381", Name: "Adjustable Race", Color: null, StandardCost: 0.00, ProductSubcategoryID: null },
     { ProductID: 2, ProductNumber: "BA-8327", Name: "Bearing Ball", Color: null, StandardCost: 0.00, ProductSubcategoryID: null },
     { ProductID: 3, ProductNumber: "BE-2349", Name: "BB Ball Bearing", Color: null, StandardCost: 0.00, ProductSubcategoryID: null },
@@ -545,16 +545,7 @@ var subcategories = [
     { ProductSubcategoryID: 37, Name: "Tires and Tubes" }
 ];
 
-function subcategoryNameFormatter(row, cell, value, columnDef, dataContext) {
-    if (value == null) return "";
 
-    var name;
-    for (var subcat in subcategories) {
-        if (value == subcategories[subcat].ProductSubcategoryID)
-            return subcategories[subcat].Name;
-    }
-    return "";
-}
 
 function asyncSubcategoryNameFormatter(row, cell, value, columnDef, dataContext) {
     if (value == null) return "";
@@ -661,3 +652,5 @@ function subcategoryEditor(args) {
         };
     }
 }
+exports.products = products
+exports.subcategories = subcategories
