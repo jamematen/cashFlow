@@ -18,5 +18,9 @@
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^3.0.7"
+  },
+  "dependencies": {
+    "jquery": "^1.11.3",
+    "jquery-ui-dist": "^1.12.1"
   }
 }

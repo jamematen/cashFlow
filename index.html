@@ -1,19 +1,26 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Hello World!</title>
-  </head>
-  <body>
-    <h1>Hello World!</h1>
-    <!-- All of the Node.js APIs are available in this renderer process. -->
-    We are using Node.js <script>document.write(process.versions.node)</script>,
-    Chromium <script>document.write(process.versions.chrome)</script>,
-    and Electron <script>document.write(process.versions.electron)</script>.
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>SlickGrid. Ejemplo Básico.</title>
+    <link href="https://code.jquery.com/ui/1.11.4/themes/blitzer/jquery-ui.css" rel="stylesheet" />
+    <link href="css/slick.grid.css" rel="stylesheet" />
+    <link href="css/theme/slick-default-theme.css" rel="stylesheet" />
+   
+    
+    
+    
+    <script >
+        require('./grid/grid')
 
-    <script>
-      // You can also require other files to run in this process
-      require('./renderer.js')
     </script>
-  </body>
+</head>
+<body>
+    <div id="FirstGrid" style="width:800px; height:500px;"></div>
+    <br />
+    <div>
+        <button id="ChangeAll">Cambiar Todos</button>
+        <button id="ChangeSome">Camibar Cuatro</button>
+    </div>
+</body>
 </html>
