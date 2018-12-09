@@ -654,3 +654,5 @@ function subcategoryEditor(args) {
 }
 exports.products = products
 exports.subcategories = subcategories
+exports.subcategoryEditor = subcategoryEditor
+exports.getSubcatNameFromBBDD = getSubcatNameFromBBDD

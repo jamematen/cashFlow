@@ -1,8 +1,18 @@
-﻿
+﻿window.$ = window.jQuery = require('../node_modules/jquery/dist/jquery.min.js')
+
 var datasource = require('../data/productdatasource')
 var subcategories = datasource.subcategories
 
 
+window.$.extend(true, window, {
+    "Slick": {
+        "Formatters": {
+            "ColorFormatter": ColorFormatter,
+            "CurrencyFormatter": CurrencyFormatter,
+            "SubcategoryNameFormatter": SubcategoryNameFormatter
+        }
+    }
+});
 
 function ColorFormatter(row, cell, value, columnDef, dataContext) {
     if (value == null || value == "")
@@ -62,8 +72,6 @@ function SubcategoryNameFormatter(row, cell, value, columnDef, dataContext) {
     return "";
 }
 
-exports.ColorFormatter = ColorFormatter
-exports.CurrencyFormatter =CurrencyFormatter
-exports.SubcategoryNameFormatter = SubcategoryNameFormatter
+
 
 
