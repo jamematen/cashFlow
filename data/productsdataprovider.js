@@ -62,13 +62,5 @@ function ProductsDataProvider() {
         
         return { ProductNumber: _data.length + " Productos", Color: "Precio medio : " + (sumOfPrice / _data.length).toFixed(2) };    }
 }
-function asyncSubcategoryNameFormatter(row, cell, value, columnDef, dataContext) {
-    if (value == null) return "";
 
-    // Comprobamos si el valor existe en la cache
-    if (columnDef.cache[value] !== undefined)
-        return columnDef.cache[value];
-
-    return "Cargando...";
-}
 exports.ProductsDataProvider = ProductsDataProvider
