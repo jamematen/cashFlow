@@ -1,5 +1,11 @@
-﻿function ProductsDataProvider() {
-    var _data = products;
+﻿
+var datasource = require('../data/productdatasource')
+var subcategoryEditor = datasource.subcategoryEditor
+
+function ProductsDataProvider() {
+    var datasource = require('../data/productdatasource')
+ 
+    var _data = datasource.products;
     var _totals = getTotalsRow();
 
     var _totalsMetadata = {
@@ -11,7 +17,7 @@
             Color: { editor: null, colspan: "*", formatter: Slick.Formatters.CurrencyFormatter },
         }
     }
-
+ 
     var _itemsMetadata = {
         columns: {
             ProductID: { editor: Slick.Editors.Numeric },
@@ -54,6 +60,15 @@
             sumOfPrice += _data[item].StandardCost;
         }
         
-        return { ProductNumber: _data.length + " Productos", Color: "Precio medio : " + (sumOfPrice / _data.length).toFixed(2) };
-    }
+        return { ProductNumber: _data.length + " Productos", Color: "Precio medio : " + (sumOfPrice / _data.length).toFixed(2) };    }
 }
+function asyncSubcategoryNameFormatter(row, cell, value, columnDef, dataContext) {
+    if (value == null) return "";
+
+    // Comprobamos si el valor existe en la cache
+    if (columnDef.cache[value] !== undefined)
+        return columnDef.cache[value];
+
+    return "Cargando...";
+}
+exports.ProductsDataProvider = ProductsDataProvider
