@@ -1,22 +1,40 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>SlickGrid. Ejemplo Básico.</title>
     <link href="https://code.jquery.com/ui/1.11.4/themes/blitzer/jquery-ui.css" rel="stylesheet" />
     <link href="css/slick.grid.css" rel="stylesheet" />
     <link href="css/theme/slick-default-theme.css" rel="stylesheet" />
     <link href="css/pildorasgrid.css" rel="stylesheet" />
-    
-    
-    
-    <script >
+    <link href="css/slick.pager.css" rel="stylesheet" />
+
+
+
+    <script>
         require('./grid/grid')
 
     </script>
 </head>
+
 <body>
-    <div id="FirstGrid" style="width:800px; height:500px;"></div>
-    
+    <div id="FirstGrid" style="width:800px; height:600px;"></div>
+    <div id="SlickPager" style="width:1024px;"></div>
+    <div style="padding:10px">
+        Filtro: Precio mínimo <span id="minCost">0</span><br />
+        <input id="costFilter" type="range" min="0" max="2500" step="10" value="0" />
+    </div>
+    <div id="pager" style="padding:10px">
+        Elementos por página:
+        <input type="radio" name="pagesize" value="0" checked /> Todos
+        <input type="radio" name="pagesize" value="25" /> 25
+        <input type="radio" name="pagesize" value="50" /> 50
+        <input type="radio" name="pagesize" value="100" /> 100<br />
+        <button id="btnPrevious">&lt;</button>
+        <button id="btnNext">&gt;</button>
+       </div>
+       
 </body>
+
 </html>

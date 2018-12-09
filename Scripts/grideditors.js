@@ -1,4 +1,5 @@
 ﻿window.$ = window.jQuery = require('../node_modules/jquery/dist/jquery.min.js')
+var subcategories = require('../data/productdatasource').subcategories
 
 
 window.$.extend(true, window, {
@@ -6,7 +7,8 @@ window.$.extend(true, window, {
         "Editors": {
             "Text": TextEditor,
             "Color": ColorEditor,
-            "Numeric": NumericEditor
+            "Numeric": NumericEditor,
+            "Subcategory":SubcategoryEditor
         }
     }
 });
@@ -170,6 +172,63 @@ function NumericEditor(args) {
         return {
             valid: true,
             msg: null
+        };
+    }
+}
+function SubcategoryEditor(args) {
+    var input;
+    var oldValue;
+
+    var init = function () {
+        var inputElement = document.createElement("input");
+        inputElement.setAttribute("type", "text");
+        inputElement.className = "gridTextEditor";
+        args.container.appendChild(inputElement);
+        input = $(inputElement);
+        input.bind("keydown", function (e) {
+            if (e.keyCode === $.ui.keyCode.LEFT || e.keyCode === $.ui.keyCode.RIGHT) {
+                e.stopImmediatePropagation();
+            }
+        })
+        .focus()
+        .select();
+    }();
+
+    this.destroy = function () { input.remove(); }
+
+    this.focus = function () { input.focus(); }
+
+    this.getValue = function () { return input.val(); }
+
+    this.setValue = function (value) { input.val(value); }
+
+    this.loadValue = function (item) {
+        oldValue = item[args.column.field] || "";
+        input.val(oldValue).attr("defaultValue", oldValue);
+        input.select();
+    }
+
+    this.serializeValue = function () { return input.val(); }
+
+    this.applyValue = function (item, state) { item[args.column.field] = state; }
+
+    this.isValueChanged = function () { return (input.val() != oldValue); }
+
+    this.validate = function () {
+        var value = input.val();
+        var valid = (value == null || value == "");
+        if (!valid) {
+            for (var subcat in subcategories) {
+                if (value == subcategories[subcat].ProductSubcategoryID)
+                {
+                    valid = true;
+                    break;
+                }
+            }
+        }
+        return {
+            valid: valid,
+            msg: (valid ? null : "La subcategoría " + value + " no existe.")
         };
     }
 }

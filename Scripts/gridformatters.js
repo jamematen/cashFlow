@@ -9,7 +9,8 @@ window.$.extend(true, window, {
         "Formatters": {
             "ColorFormatter": ColorFormatter,
             "CurrencyFormatter": CurrencyFormatter,
-            "SubcategoryNameFormatter": SubcategoryNameFormatter
+            "SubcategoryNameFormatter": SubcategoryNameFormatter,
+            "AsyncSubcategoryNameFormatter":asyncSubcategoryNameFormatter
         }
     }
 });
@@ -70,6 +71,15 @@ function SubcategoryNameFormatter(row, cell, value, columnDef, dataContext) {
             return subcategories[subcat].Name;
     }
     return "";
+}
+function asyncSubcategoryNameFormatter(row, cell, value, columnDef, dataContext) {
+    if (value == null) return "";
+
+    // Comprobamos si el valor existe en la cache
+    if (columnDef.cache[value] !== undefined)
+        return columnDef.cache[value];
+
+    return "Cargando...";
 }
 
 
