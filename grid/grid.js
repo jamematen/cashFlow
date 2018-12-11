@@ -9,6 +9,7 @@ require('../Scripts/grideditors')
 require('../Scripts/gridformatters')
 require('../Scripts/slick.dataview.js')
 require('../Scripts/slick.pager.js')
+require('../model/movement')
 
 var datasource = require('../data/productdatasource')
 
@@ -64,7 +65,8 @@ var options = {
     editable: true,
     enableAsyncPostRender: true,
     asyncPostRenderDelay: 10,
-    multiColumnSort: true
+    multiColumnSort: true,
+    syncColumnCellResize: true
 };
 
 
