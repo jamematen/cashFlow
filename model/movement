@@ -1,7 +1,12 @@
 
 "use strict"
 
-class Movement{
-    
+class AccountingPoint {
+    constructor(date,amount=0,concept="", notes ="" ){
+        this.date = date
+        this.amount = amount
+        this.concept = concept
+        this.notes = notes
+    }
 
 }
