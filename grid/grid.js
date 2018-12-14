@@ -11,7 +11,14 @@ require('../Scripts/slick.dataview.js')
 require('../Scripts/slick.pager.js')
 require('../model/movement')
 
-var gastos = require('../data/gastos.js').gastos
+var gastos = require('../data/database.js').db
+gastos.find({},function(err,docs){
+    if(error){
+        console.error(err)
+        return
+    }
+    console.log(docs)
+})
 
 
 //var getSubcatNameFromBBDD = datasource.getSubcatNameFromBBDD
