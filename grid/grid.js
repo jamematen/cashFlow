@@ -11,52 +11,39 @@ require('../Scripts/slick.dataview.js')
 require('../Scripts/slick.pager.js')
 require('../model/movement')
 
-var datasource = require('../data/productdatasource')
-
-var products = datasource.products
-
-var getSubcatNameFromBBDD = datasource.getSubcatNameFromBBDD
+var gastos = require('../data/gastos.js').gastos
 
 
+//var getSubcatNameFromBBDD = datasource.getSubcatNameFromBBDD
+
+console.log(gastos.length)
 
 
 
 
 var columns = [
     {
-        name: "ID", field: "ProductID", id: "ProductID", width: 60, resizable: false
+        name: "ID", field: "ID", id: "ID", width: 60, resizable: false
         , headerCssClass: "prKeyHeadColumn", cssClass: "numericCell", editor: Slick.Editors.Text
         , sortable: true
     },
     {
-        name: "Nº Producto", field: "ProductNumber", id: "ProductNumber", width: 120, resizable: false
-        , headerCssClass: "headColumn", editor: Slick.Editors.Text
+        name: "Fecha", field: "Fecha", id: "Fecha", width: 120, resizable: false
+        , headerCssClass: "headColumn", editor: Slick.Editors.Data
         , sortable: true
     },
     {
-        name: "Denominación", field: "Name", id: "Name", width: 250, minWidth: 150, maxWidth: 400
-        , headerCssClass: "headColumn", editor: Slick.Editors.Text
+        name: "Importe", field: "Importe", id: "Importe", width: 250, minWidth: 150, maxWidth: 400
+        , headerCssClass: "headColumn", editor: Slick.Editors.Text, formatter: Slick.Formatters.CurrencyFormatter
         , sortable: true
     },
     {
-        name: "Color", field: "Color", id: "Color", width: 80, minWidth: 60, maxWidth: 120
-        , headerCssClass: "headColumn", formatter: Slick.Formatters.ColorFormatter
-        , editor: Slick.Editors.Color
+        name: "Concepto", field: "Concepto", id: "Concepto", width: 80, minWidth: 60, maxWidth: 120
+        , headerCssClass: "headColumn",  editor: Slick.Editors.Text
     },
     {
-        name: "Precio", field: "StandardCost", id: "StandardCost", width: 110, minWidth: 80, maxWidth: 170
-        , headerCssClass: "headColumn", cssClass: "numericCell", formatter: Slick.Formatters.CurrencyFormatter
-        , editor: Slick.Editors.Text, sortable: true
-    },
-    {
-        name: "Sub", field: "ProductSubcategoryID", id: "ProductSubcategoryID", width: 60, resizable: false
-        , headerCssClass: "headColumn", cssClass: "numericCell", editor: Slick.Editors.Subcategory
-        , sortable: true
-    },
-    {
-        name: "Subcategoría", field: "ProductSubcategoryID", id: "SubcategoryName"
-        , width: 200, minWidth: 150, maxWidth: 400, headerCssClass: "headColumn"
-        , formatter: Slick.Formatters.AsyncSubcategoryNameFormatter, asyncPostRender: getSubcategoryName, cache: {}
+        name: "Nombre cuenta", field: "Nombre cuenta", id: "Nombre cuenta", width: 110, minWidth: 80, maxWidth: 170
+        , headerCssClass: "headColumn", cssClass: "numericCell"  , editor: Slick.Editors.Text, sortable: true
     }
 ];
 
@@ -100,22 +87,24 @@ function costFilter(item, args) {
 $(function () {
     var dataProvider = new Slick.Data.DataView();
     dataProvider.setFilter(costFilter);
+
+    
     var grid = new Slick.Grid("#FirstGrid", dataProvider, columns, options);
     dataProvider.onRowCountChanged.subscribe(function (e, args) {
         grid.updateRowCount();
-        grid.render();
+       grid.render();
     });
 
     dataProvider.onRowsChanged.subscribe(function (e, args) {
-        grid.invalidateRows(args.rows);
-        grid.render();
+       grid.invalidateRows(args.rows);
+       grid.render();
     });
 
     grid.onCellChange.subscribe(function (e, args) {
-        dataProvider.updateItem(args.item.ProductID, args.item);
+    dataProvider.updateItem(args.item.ProductID, args.item);
     });
 
-    dataProvider.setItems(products, "ProductID");
+   dataProvider.setItems(gastos, "Id");
 
     grid.onSort.subscribe(function (e, args) {
         var comparer, ascending;
@@ -154,8 +143,8 @@ $(function () {
         dataProvider.setPagingOptions(
             {
                 pageSize: parseInt($("[name=pagesize]:checked").val())
-                , pageNum: 0
-            });
+               , pageNum: 0
+           });
     });
 
     $("#btnPrevious").click(function () {
@@ -168,7 +157,7 @@ $(function () {
         var toPage = dataProvider.getPagingInfo().pageNum + 1;
         var total = dataProvider.getPagingInfo().totalPages;
         if (toPage >= total) toPage = total - 1;
-        dataProvider.setPagingOptions({ pageNum: toPage });
+       dataProvider.setPagingOptions({ pageNum: toPage });
     })
     var pager = new Slick.Controls.Pager(dataProvider, grid, $("#SlickPager"));
 });
