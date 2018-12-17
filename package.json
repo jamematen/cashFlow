@@ -4,7 +4,8 @@
   "description": "A simple casflow over electron",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "NODE_ENV=dev electron .",
+    "build": "NODE_ENV=prod electron-builder"
   },
   "repository": "https://github.com/jamematen/cashflow.git",
   "keywords": [
@@ -18,6 +19,7 @@
   "dependencies": {
     "jquery": "^1.11.3",
     "jquery-ui-dist": "^1.12.1",
-    "nedb": "^1.8.0"
+    "nedb": "^1.8.0",
+    "nedb-promises": "^3.0.2"
   }
 }

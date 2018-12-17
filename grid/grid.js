@@ -11,19 +11,11 @@ require('../Scripts/slick.dataview.js')
 require('../Scripts/slick.pager.js')
 require('../model/movement')
 
-var gastos = require('../data/database.js').db
-gastos.find({},function(err,docs){
-    if(error){
-        console.error(err)
-        return
-    }
-    console.log(docs)
-})
+const db = require('./../data/db')
 
 
 //var getSubcatNameFromBBDD = datasource.getSubcatNameFromBBDD
 
-console.log(gastos.length)
 
 
 
@@ -46,11 +38,11 @@ var columns = [
     },
     {
         name: "Concepto", field: "Concepto", id: "Concepto", width: 80, minWidth: 60, maxWidth: 120
-        , headerCssClass: "headColumn",  editor: Slick.Editors.Text
+        , headerCssClass: "headColumn", editor: Slick.Editors.Text
     },
     {
         name: "Nombre cuenta", field: "Nombre cuenta", id: "Nombre cuenta", width: 110, minWidth: 80, maxWidth: 170
-        , headerCssClass: "headColumn", cssClass: "numericCell"  , editor: Slick.Editors.Text, sortable: true
+        , headerCssClass: "headColumn", cssClass: "numericCell", editor: Slick.Editors.Text, sortable: true
     }
 ];
 
@@ -92,26 +84,49 @@ function costFilter(item, args) {
 
 
 $(function () {
+
+    const createGasto = async (gasto) => {      
+        const gas = await db.gastos.insert({gasto})
+        return gas
+      }
+
+    createGasto({"Fecha": "21-12-2018", "Cuenta":"Tienda", "Importe": 343, "Concepto":"Toldo", "Id":8484})
+
+
+    const getGastos = async () => {
+        const gastos = await db.gastos.find({},function (err, docs) {
+            if(err)
+                console.log(err)
+
+            else 
+                console.log(docs)
+          })
+        
+        return { gastos }
+    }
+
+
     var dataProvider = new Slick.Data.DataView();
     dataProvider.setFilter(costFilter);
 
-    
+
     var grid = new Slick.Grid("#FirstGrid", dataProvider, columns, options);
     dataProvider.onRowCountChanged.subscribe(function (e, args) {
         grid.updateRowCount();
-       grid.render();
+        grid.render();
     });
 
     dataProvider.onRowsChanged.subscribe(function (e, args) {
-       grid.invalidateRows(args.rows);
-       grid.render();
+        grid.invalidateRows(args.rows);
+        grid.render();
     });
 
     grid.onCellChange.subscribe(function (e, args) {
-    dataProvider.updateItem(args.item.ProductID, args.item);
+        dataProvider.updateItem(args.item.ProductID, args.item);
     });
 
-   dataProvider.setItems(gastos, "Id");
+
+    dataProvider.setItems(getGastos(), "Id");
 
     grid.onSort.subscribe(function (e, args) {
         var comparer, ascending;
@@ -150,8 +165,8 @@ $(function () {
         dataProvider.setPagingOptions(
             {
                 pageSize: parseInt($("[name=pagesize]:checked").val())
-               , pageNum: 0
-           });
+                , pageNum: 0
+            });
     });
 
     $("#btnPrevious").click(function () {
@@ -164,7 +179,7 @@ $(function () {
         var toPage = dataProvider.getPagingInfo().pageNum + 1;
         var total = dataProvider.getPagingInfo().totalPages;
         if (toPage >= total) toPage = total - 1;
-       dataProvider.setPagingOptions({ pageNum: toPage });
+        dataProvider.setPagingOptions({ pageNum: toPage });
     })
     var pager = new Slick.Controls.Pager(dataProvider, grid, $("#SlickPager"));
 });
