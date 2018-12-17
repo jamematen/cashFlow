@@ -11,6 +11,7 @@ require('../Scripts/slick.dataview.js')
 require('../Scripts/slick.pager.js')
 require('../model/movement')
 
+
 const db = require('./../data/db')
 
 
@@ -41,7 +42,7 @@ var columns = [
         , headerCssClass: "headColumn", editor: Slick.Editors.Text
     },
     {
-        name: "Nombre cuenta", field: "Nombre cuenta", id: "Nombre cuenta", width: 110, minWidth: 80, maxWidth: 170
+        name: "Cuenta", field: "Cuenta", id: "Cuenta", width: 110, minWidth: 80, maxWidth: 170
         , headerCssClass: "headColumn", cssClass: "numericCell", editor: Slick.Editors.Text, sortable: true
     }
 ];
@@ -75,12 +76,6 @@ function getSubcategoryName(cellNode, row, dataContext, colDef) {
     $(cellNode).text(name);
 }
 
-function costFilter(item, args) {
-    if (args == null) return true;
-
-    return (item["StandardCost"] >= args.minCost);
-}
-
 
 
 $(function () {
@@ -90,24 +85,28 @@ $(function () {
         return gas
       }
 
-    createGasto({"Fecha": "21-12-2018", "Cuenta":"Tienda", "Importe": 343, "Concepto":"Toldo", "Id":8484})
+    createGasto({"Fecha": "21-12-2018", "Cuenta":"Tienda", "Importe": 343, "Concepto":"Toldo", "Id":Math.random()*1000})
 
+
+    var dataProvider = new Slick.Data.DataView();
 
     const getGastos = async () => {
         const gastos = await db.gastos.find({},function (err, docs) {
-            if(err)
+            if(err){
                 console.log(err)
-
-            else 
-                console.log(docs)
+            }
+            dataProvider.setItems(gastos, "Id");
+            
           })
         
         return { gastos }
     }
 
+    
 
-    var dataProvider = new Slick.Data.DataView();
-    dataProvider.setFilter(costFilter);
+    getGastos()
+    
+   
 
 
     var grid = new Slick.Grid("#FirstGrid", dataProvider, columns, options);
@@ -120,14 +119,14 @@ $(function () {
         grid.invalidateRows(args.rows);
         grid.render();
     });
-
+    
     grid.onCellChange.subscribe(function (e, args) {
         dataProvider.updateItem(args.item.ProductID, args.item);
     });
 
 
-    dataProvider.setItems(getGastos(), "Id");
-
+    
+   
     grid.onSort.subscribe(function (e, args) {
         var comparer, ascending;
         if (args.multiColumnSort) {
@@ -154,12 +153,7 @@ $(function () {
         dataProvider.sort(comparer, ascending);
     });
 
-    $("#costFilter").change(function (e) {
-        var value = $(this).val();
-        $("#minCost").text(value);
-        dataProvider.setFilterArgs({ minCost: value });
-        dataProvider.refresh();
-    });
+   
 
     $("[name=pagesize]").click(function () {
         dataProvider.setPagingOptions(
