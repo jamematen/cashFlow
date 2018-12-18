@@ -13,7 +13,7 @@ require('../model/movement')
 
 
 const db = require('./../data/db')
-const gastos = require('./../data/gastos').gastos
+//const gastos = require('./../data/gastos').gastos
 
 
 //var getSubcatNameFromBBDD = datasource.getSubcatNameFromBBDD
@@ -24,7 +24,7 @@ const gastos = require('./../data/gastos').gastos
 
 var columns = [
     {
-        name: "ID", field: "ID", id: "ID", width: 60, resizable: false
+        name: "Id", field: "Id", id: "Id", width: 60, resizable: false
         , headerCssClass: "prKeyHeadColumn", cssClass: "numericCell", editor: Slick.Editors.Text
         , sortable: true
     },
@@ -65,7 +65,7 @@ var options = {
 function DateFormatter(rowIndex, cell, value, columnDef, grid, dataProvider) {
     if (value == null || value === "") { return "-"; }
     return new Date(value).toLocaleDateString()
-  }
+}
 
 
 
@@ -77,13 +77,14 @@ $(function () {
     var dataProvider = new Slick.Data.DataView();
 
     db.gastos.find({})
-        
+
         .then((docs) => {
             docs.map((doc) => {
-                
+
                 doc.Fecha = new Date(doc.Fecha).valueOf();
             })
-            dataProvider.setItems(docs, "Id")})
+            dataProvider.setItems(docs, "Id")
+        })
 
         .catch((err) => console.log(err))
 
