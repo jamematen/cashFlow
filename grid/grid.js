@@ -13,6 +13,7 @@ require('../model/movement')
 
 
 const db = require('./../data/db')
+const gastos = require('./../data/gastos').gastos
 
 
 //var getSubcatNameFromBBDD = datasource.getSubcatNameFromBBDD
@@ -28,13 +29,13 @@ var columns = [
         , sortable: true
     },
     {
-        name: "Fecha", field: "Fecha", id: "Fecha", width: 120, resizable: false
-        , headerCssClass: "headColumn", editor: Slick.Editors.Data
+        name: "Fecha", field: "Fecha", id: "Fecha", width: 120, resizable: true
+        , headerCssClass: "headColumn", editor: Slick.Editors.Data, formatter: DateFormatter
         , sortable: true
     },
     {
-        name: "Importe", field: "Importe", id: "Importe", width: 250, minWidth: 150, maxWidth: 400
-        , headerCssClass: "headColumn", editor: Slick.Editors.Text, formatter: Slick.Formatters.CurrencyFormatter
+        name: "Importe", field: "Importe", id: "Importe", width: 100, minWidth: 50, maxWidth: 200
+        , headerCssClass: "headColumn", editor: Slick.Editors.Integer, formatter: Slick.Formatters.CurrencyFormatter
         , sortable: true
     },
     {
@@ -44,8 +45,13 @@ var columns = [
     {
         name: "Cuenta", field: "Cuenta", id: "Cuenta", width: 110, minWidth: 80, maxWidth: 170
         , headerCssClass: "headColumn", cssClass: "numericCell", editor: Slick.Editors.Text, sortable: true
+    },
+    {
+        name: "Notas", field: "Notas", id: "Notas", width: 110, minWidth: 80, maxWidth: 170
+        , headerCssClass: "headColumn", cssClass: "numericCell", editor: Slick.Editors.Text, sortable: true
     }
 ];
+
 
 
 var options = {
@@ -56,57 +62,35 @@ var options = {
     syncColumnCellResize: true
 };
 
+function DateFormatter(rowIndex, cell, value, columnDef, grid, dataProvider) {
+    if (value == null || value === "") { return "-"; }
+    return new Date(value).toLocaleDateString()
+  }
 
-
-function getSubcategoryName(cellNode, row, dataContext, colDef) {
-    var cell = $(cellNode);
-    if (cell.text() !== "Cargando...") return;
-
-    var value = dataContext[colDef.field];
-    var name;
-    // Comprobamos si el valor existe en la cache
-    if (colDef.cache[value] === undefined) {
-        name = getSubcatNameFromBBDD(value);
-        // Introducimos el valor en la cache
-        colDef.cache[value] = name;
-    }
-    else
-        name = colDef.cache[value];
-
-    $(cellNode).text(name);
-}
 
 
 
 $(function () {
 
-    const createGasto = async (gasto) => {      
-        const gas = await db.gastos.insert({gasto})
-        return gas
-      }
-
-    createGasto({"Fecha": "21-12-2018", "Cuenta":"Tienda", "Importe": 343, "Concepto":"Toldo", "Id":Math.random()*1000})
 
 
     var dataProvider = new Slick.Data.DataView();
 
-    const getGastos = async () => {
-        const gastos = await db.gastos.find({},function (err, docs) {
-            if(err){
-                console.log(err)
-            }
-            dataProvider.setItems(gastos, "Id");
-            
-          })
+    db.gastos.find({})
         
-        return { gastos }
-    }
+        .then((docs) => {
+            docs.map((doc) => {
+                
+                doc.Fecha = new Date(doc.Fecha).valueOf();
+            })
+            dataProvider.setItems(docs, "Id")})
 
-    
+        .catch((err) => console.log(err))
 
-    getGastos()
-    
-   
+
+
+
+
 
 
     var grid = new Slick.Grid("#FirstGrid", dataProvider, columns, options);
@@ -119,14 +103,14 @@ $(function () {
         grid.invalidateRows(args.rows);
         grid.render();
     });
-    
+
     grid.onCellChange.subscribe(function (e, args) {
         dataProvider.updateItem(args.item.ProductID, args.item);
     });
 
 
-    
-   
+
+
     grid.onSort.subscribe(function (e, args) {
         var comparer, ascending;
         if (args.multiColumnSort) {
@@ -153,7 +137,7 @@ $(function () {
         dataProvider.sort(comparer, ascending);
     });
 
-   
+
 
     $("[name=pagesize]").click(function () {
         dataProvider.setPagingOptions(
