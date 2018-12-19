@@ -9,6 +9,7 @@ const dbFactory = (fileName) => Datastore.create({
 
 const db = {
    gastos: dbFactory('gastos.db'),
+   //gastos2: dbFactory('gastos2.db')
   
  };
  

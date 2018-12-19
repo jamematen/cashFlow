@@ -75,14 +75,19 @@ $(function () {
 
 
     var dataProvider = new Slick.Data.DataView();
+    var desde = new Date("06/01/2018").valueOf()
+    var hasta = new Date("07/01/2018").valueOf()
 
-    db.gastos.find({})
+
+    db.gastos.find( {$and : [{"Fecha": {$gte: desde}}, {"Fecha": {$lt: hasta}}]    }  )
 
         .then((docs) => {
             docs.map((doc) => {
 
-                doc.Fecha = new Date(doc.Fecha).valueOf();
+                doc.Fecha = new Date(doc.Fecha);
             })
+
+            //db.gastos2.insert(docs)
             dataProvider.setItems(docs, "Id")
         })
 
