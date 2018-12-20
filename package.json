@@ -19,6 +19,7 @@
   "dependencies": {
     "jquery": "^1.11.3",
     "jquery-ui-dist": "^1.12.1",
+    "moment": "^2.23.0",
     "nedb": "^1.8.0",
     "nedb-promises": "^3.0.2"
   }

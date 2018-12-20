@@ -10,6 +10,7 @@ require('../Scripts/gridformatters')
 require('../Scripts/slick.dataview.js')
 require('../Scripts/slick.pager.js')
 require('../model/movement')
+const moment = require('moment')
 
 
 const db = require('./../data/db')
@@ -29,8 +30,8 @@ var columns = [
         , sortable: true
     },
     {
-        name: "Fecha", field: "Fecha", id: "Fecha", width: 120, resizable: true
-        , headerCssClass: "headColumn", editor: Slick.Editors.Data, formatter: DateFormatter
+        name: "Fecha", field: "Fecha", id: "Fecha", width: 120, resizable: true, formatter: DateFormatter
+        , headerCssClass: "headColumn", editor: Slick.Editors.Data
         , sortable: true
     },
     {
@@ -62,9 +63,10 @@ var options = {
     syncColumnCellResize: true
 };
 
+
 function DateFormatter(rowIndex, cell, value, columnDef, grid, dataProvider) {
     if (value == null || value === "") { return "-"; }
-    return new Date(value).toLocaleDateString()
+    return moment(value).format("YYYY-MM-DD")
 }
 
 
@@ -75,16 +77,17 @@ $(function () {
 
 
     var dataProvider = new Slick.Data.DataView();
-    var desde = new Date("06/01/2018").valueOf()
-    var hasta = new Date("07/01/2018").valueOf()
+    var desde = moment("06/01/2018").format("YYYY-MM-DD")
+    var hasta = moment("07/01/2018").format("YYYY-MM-DD")
 
+    //{$and : [{"Fecha": {$gte: desde}}, {"Fecha": {$lt: hasta}}]    }
 
-    db.gastos.find( {$and : [{"Fecha": {$gte: desde}}, {"Fecha": {$lt: hasta}}]    }  )
+    db.gastos.find(  {$and : [{"Fecha": {$gte: desde}}, {"Fecha": {$lt: hasta}}]} )
 
         .then((docs) => {
             docs.map((doc) => {
 
-                doc.Fecha = new Date(doc.Fecha);
+                doc.Fecha = moment(doc.Fecha);
             })
 
             //db.gastos2.insert(docs)
