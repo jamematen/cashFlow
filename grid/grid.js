@@ -10,6 +10,7 @@ require('../Scripts/gridformatters')
 require('../Scripts/slick.dataview.js')
 require('../Scripts/slick.pager.js')
 require('../model/movement')
+require('../Scripts/groupitemmetadataprovider.js')
 const moment = require('moment')
 
 
@@ -37,7 +38,7 @@ var columns = [
     {
         name: "Importe", field: "Importe", id: "Importe", width: 100, minWidth: 50, maxWidth: 200
         , headerCssClass: "headColumn", editor: Slick.Editors.Integer, formatter: Slick.Formatters.CurrencyFormatter
-        , sortable: true
+        , sortable: true,groupTotalsFormatter: sumTotalsFormatter
     },
     {
         name: "Concepto", field: "Concepto", id: "Concepto", width: 80, minWidth: 60, maxWidth: 120
@@ -64,7 +65,7 @@ var options = {
 };
 
 
-function DateFormatter(rowIndex, cell, value, columnDef, grid, dataProvider) {
+function DateFormatter(rowIndex, cell, value, columnDef, grid, dataView) {
     if (value == null || value === "") { return "-"; }
     return moment(value).format("YYYY-MM-DD")
 }
@@ -76,7 +77,7 @@ $(function () {
 
 
 
-    var dataProvider = new Slick.Data.DataView();
+    var dataView = new Slick.Data.DataView();
     var desde = moment("06/01/2018").format("YYYY-MM-DD")
     var hasta = moment("07/01/2018").format("YYYY-MM-DD")
 
@@ -91,7 +92,7 @@ $(function () {
             })
 
             //db.gastos2.insert(docs)
-            dataProvider.setItems(docs, "Id")
+            dataView.setItems(docs, "Id")
         })
 
         .catch((err) => console.log(err))
@@ -100,21 +101,21 @@ $(function () {
 
 
 
+    groupByConcepto(dataView)
 
-
-    var grid = new Slick.Grid("#FirstGrid", dataProvider, columns, options);
-    dataProvider.onRowCountChanged.subscribe(function (e, args) {
+    var grid = new Slick.Grid("#FirstGrid", dataView, columns, options);
+    dataView.onRowCountChanged.subscribe(function (e, args) {
         grid.updateRowCount();
         grid.render();
     });
 
-    dataProvider.onRowsChanged.subscribe(function (e, args) {
+    dataView.onRowsChanged.subscribe(function (e, args) {
         grid.invalidateRows(args.rows);
         grid.render();
     });
 
     grid.onCellChange.subscribe(function (e, args) {
-        dataProvider.updateItem(args.item.ProductID, args.item);
+        dataView.updateItem(args.item.ProductID, args.item);
     });
 
 
@@ -143,13 +144,13 @@ $(function () {
             };
             ascending = args.sortAsc;
         }
-        dataProvider.sort(comparer, ascending);
+        dataView.sort(comparer, ascending);
     });
 
 
 
     $("[name=pagesize]").click(function () {
-        dataProvider.setPagingOptions(
+        dataView.setPagingOptions(
             {
                 pageSize: parseInt($("[name=pagesize]:checked").val())
                 , pageNum: 0
@@ -157,17 +158,53 @@ $(function () {
     });
 
     $("#btnPrevious").click(function () {
-        var toPage = dataProvider.getPagingInfo().pageNum - 1;
+        var toPage = dataView.getPagingInfo().pageNum - 1;
         if (toPage < 0) toPage = 0;
-        dataProvider.setPagingOptions({ pageNum: toPage });
+        dataView.setPagingOptions({ pageNum: toPage });
     });
 
     $("#btnNext").click(function () {
-        var toPage = dataProvider.getPagingInfo().pageNum + 1;
-        var total = dataProvider.getPagingInfo().totalPages;
+        var toPage = dataView.getPagingInfo().pageNum + 1;
+        var total = dataView.getPagingInfo().totalPages;
         if (toPage >= total) toPage = total - 1;
-        dataProvider.setPagingOptions({ pageNum: toPage });
+        dataView.setPagingOptions({ pageNum: toPage });
     })
-    var pager = new Slick.Controls.Pager(dataProvider, grid, $("#SlickPager"));
+    var pager = new Slick.Controls.Pager(dataView, grid, $("#SlickPager"));
 });
+/*
+function agrupa(docs){
+    var comunes= ["Sueldo Pepe", "Sueldo Ori","Autonomos", "Bancos","Mercaderias", "Gestoria", "Portes"]
+    var tienda = [""]
+    var grupos = []
 
+    docs.map((doc) => {
+
+        doc.Fecha = moment(doc.Fecha);
+    })
+
+
+
+}*/
+
+function groupByConcepto(dataView) {
+    dataView.setGrouping({
+      getter: "Concepto",
+      formatter: function (g) {
+        return "Concepto:  " + g.value +"  <span style='color:green'>(" + g.count + " items)</span>";
+      },
+      aggregators: [
+        //new Slick.Data.Aggregators.Avg("percentComplete"),
+        new Slick.Data.Aggregators.Sum("Importe")
+      ],
+      aggregateCollapsed: true,
+      lazyTotalsCalculation: false
+    });
+  }
+
+  function sumTotalsFormatter(totals, columnDef) {
+    var val = totals.sum && totals.sum[columnDef.field];
+    if (val != null) {
+      return "total: " + ((Math.round(parseFloat(val)*100)/100));
+    }
+    return "";
+  }
