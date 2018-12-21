@@ -3,14 +3,17 @@ window.$ = window.jQuery = require('../node_modules/jquery/dist/jquery.min.js')
 
 require("../node_modules/jquery-ui-dist/jquery-ui.min.js")
 require('../Scripts/jquery.event.drag-2.2.js')
-require('../Scripts/slick.core.js')
-require('../Scripts/slick.grid.js')
-require('../Scripts/grideditors')
-require('../Scripts/gridformatters')
-require('../Scripts/slick.dataview.js')
+require('../node_modules/slickgrid/slick.core.js')
+require('../node_modules/slickgrid/slick.grid.js')
+require('../node_modules/slickgrid/slick.editors.js')
+require('../node_modules/slickgrid/slick.formatters.js')
+require('../node_modules/slickgrid/slick.dataview.js')
 require('../Scripts/slick.pager.js')
 require('../model/movement')
-require('../Scripts/groupitemmetadataprovider.js')
+require('../node_modules/slickgrid/slick.groupitemmetadataprovider.js')
+require('../node_modules/slickgrid/plugins/slick.cellselectionmodel.js')
+require('../node_modules/slickgrid/plugins/slick.cellrangeselector.js')
+require('../node_modules/slickgrid/plugins/slick.cellrangedecorator.js')
 const moment = require('moment')
 
 
@@ -38,7 +41,7 @@ var columns = [
     {
         name: "Importe", field: "Importe", id: "Importe", width: 100, minWidth: 50, maxWidth: 200
         , headerCssClass: "headColumn", editor: Slick.Editors.Integer, formatter: Slick.Formatters.CurrencyFormatter
-        , sortable: true,groupTotalsFormatter: sumTotalsFormatter
+        , sortable: true, groupTotalsFormatter: sumTotalsFormatter
     },
     {
         name: "Concepto", field: "Concepto", id: "Concepto", width: 80, minWidth: 60, maxWidth: 120
@@ -75,15 +78,20 @@ function DateFormatter(rowIndex, cell, value, columnDef, grid, dataView) {
 
 $(function () {
 
+    var groupItemMetadataProvider = new Slick.Data.GroupItemMetadataProvider();
+    dataView = new Slick.Data.DataView({
+        groupItemMetadataProvider: groupItemMetadataProvider,
+        inlineFilters: true
+    })
 
 
-    var dataView = new Slick.Data.DataView();
-    var desde = moment("06/01/2018").format("YYYY-MM-DD")
-    var hasta = moment("07/01/2018").format("YYYY-MM-DD")
+    //var dataView = new Slick.Data.DataView();
+    var desde = moment("2018-06-01").format("YYYY-MM-DD")
+    var hasta = moment("2018-06-30").format("YYYY-MM-DD")
 
-    //{$and : [{"Fecha": {$gte: desde}}, {"Fecha": {$lt: hasta}}]    }
+    var criterio = { $and: [{ "Fecha": { $gte: desde } }, { "Fecha": { $lt: hasta } }] }
 
-    db.gastos.find(  {$and : [{"Fecha": {$gte: desde}}, {"Fecha": {$lt: hasta}}]} )
+    db.gastos.find(criterio)
 
         .then((docs) => {
             docs.map((doc) => {
@@ -104,6 +112,11 @@ $(function () {
     groupByConcepto(dataView)
 
     var grid = new Slick.Grid("#FirstGrid", dataView, columns, options);
+    // register the group item metadata provider to add expand/collapse group handlers
+    grid.registerPlugin(groupItemMetadataProvider);
+    grid.setSelectionModel(new Slick.CellSelectionModel());
+
+
     dataView.onRowCountChanged.subscribe(function (e, args) {
         grid.updateRowCount();
         grid.render();
@@ -188,23 +201,23 @@ function agrupa(docs){
 
 function groupByConcepto(dataView) {
     dataView.setGrouping({
-      getter: "Concepto",
-      formatter: function (g) {
-        return "Concepto:  " + g.value +"  <span style='color:green'>(" + g.count + " items)</span>";
-      },
-      aggregators: [
-        //new Slick.Data.Aggregators.Avg("percentComplete"),
-        new Slick.Data.Aggregators.Sum("Importe")
-      ],
-      aggregateCollapsed: true,
-      lazyTotalsCalculation: false
+        getter: "Concepto",
+        formatter: function (g) {
+            return "Concepto:  " + g.value + "  <span style='color:green'>(" + g.count + " items)</span>";
+        },
+        aggregators: [
+            //new Slick.Data.Aggregators.Avg("percentComplete"),
+            new Slick.Data.Aggregators.Sum("Importe")
+        ],
+        aggregateCollapsed: true,
+        lazyTotalsCalculation: false
     });
-  }
+}
 
-  function sumTotalsFormatter(totals, columnDef) {
+function sumTotalsFormatter(totals, columnDef) {
     var val = totals.sum && totals.sum[columnDef.field];
     if (val != null) {
-      return "total: " + ((Math.round(parseFloat(val)*100)/100));
+        return "total: " + ((Math.round(parseFloat(val) * 100) / 100));
     }
     return "";
-  }
+}
