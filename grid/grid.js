@@ -86,8 +86,8 @@ $(function () {
 
 
     //var dataView = new Slick.Data.DataView();
-    var desde = moment("2018-06-01").format("YYYY-MM-DD")
-    var hasta = moment("2018-06-30").format("YYYY-MM-DD")
+    var desde = moment("2018-01-01").format("YYYY-MM-DD")
+    var hasta = moment("2018-12-31").format("YYYY-MM-DD")
 
     var criterio = { $and: [{ "Fecha": { $gte: desde } }, { "Fecha": { $lt: hasta } }] }
 
