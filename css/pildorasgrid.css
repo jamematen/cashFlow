@@ -10,7 +10,7 @@
 }
 
 .numericCell {
-    text-align: right;
+    text-align: left;
 }
 
 input.gridTextEditor{
@@ -27,4 +27,10 @@ input.gridTextEditor{
     color: #dddddd;
     background-color: rgb(204,0,0);
     font-weight: bold;
+}
+.ui-widget {
+    font-size: 0.75em;
+}
+.conceptoClass{
+    font-size: 1.3em;
 }

@@ -1,3 +1,5 @@
+
+
 window.$ = window.jQuery = require('../node_modules/jquery/dist/jquery.min.js')
 
 
@@ -18,6 +20,10 @@ const moment = require('moment')
 
 
 const db = require('./../data/db')
+getMonthlyColumns = require('../model/accountingBook.js').getMonthlyColumns
+setMonthlyData = require('../model/accountingBook.js').setMonthlyData
+
+
 //const gastos = require('./../data/gastos').gastos
 
 
@@ -78,6 +84,11 @@ function DateFormatter(rowIndex, cell, value, columnDef, grid, dataView) {
 
 $(function () {
 
+
+    col = getMonthlyColumns('2018', 3)
+
+    //console.log(col)
+
     var groupItemMetadataProvider = new Slick.Data.GroupItemMetadataProvider();
     dataView = new Slick.Data.DataView({
         groupItemMetadataProvider: groupItemMetadataProvider,
@@ -86,12 +97,12 @@ $(function () {
 
 
     //var dataView = new Slick.Data.DataView();
-    var desde = moment("2018-01-01").format("YYYY-MM-DD")
-    var hasta = moment("2018-12-31").format("YYYY-MM-DD")
+    var desde = moment("2018-4-1").format("YYYY-MM-DD")
+    var hasta = moment("2018-5-1").format("YYYY-MM-DD")
 
     var criterio = { $and: [{ "Fecha": { $gte: desde } }, { "Fecha": { $lt: hasta } }] }
 
-    db.gastos.find(criterio)
+    /*db.gastos.find(criterio)
 
         .then((docs) => {
             docs.map((doc) => {
@@ -103,15 +114,16 @@ $(function () {
             dataView.setItems(docs, "Id")
         })
 
-        .catch((err) => console.log(err))
+        .catch((err) => console.log(err))*/
 
-
+    setMonthlyData(criterio,dataView)
+        
 
 
 
     groupByConcepto(dataView)
 
-    var grid = new Slick.Grid("#FirstGrid", dataView, columns, options);
+    var grid = new Slick.Grid("#FirstGrid", dataView, col, options);
     // register the group item metadata provider to add expand/collapse group handlers
     grid.registerPlugin(groupItemMetadataProvider);
     grid.setSelectionModel(new Slick.CellSelectionModel());
@@ -184,20 +196,7 @@ $(function () {
     })
     var pager = new Slick.Controls.Pager(dataView, grid, $("#SlickPager"));
 });
-/*
-function agrupa(docs){
-    var comunes= ["Sueldo Pepe", "Sueldo Ori","Autonomos", "Bancos","Mercaderias", "Gestoria", "Portes"]
-    var tienda = [""]
-    var grupos = []
 
-    docs.map((doc) => {
-
-        doc.Fecha = moment(doc.Fecha);
-    })
-
-
-
-}*/
 
 function groupByConcepto(dataView) {
     dataView.setGrouping({
