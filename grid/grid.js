@@ -104,7 +104,7 @@ $(function () {
 
 
 
-    var col = setMonthlyBook(moment("2018-9-1"), dataView)
+    var col = setMonthlyBook(moment("2018-1-15"), dataView)
 
 
 

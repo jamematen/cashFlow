@@ -3,14 +3,15 @@
 var moment = require('moment')
 const db = require('./../data/db')
 
-var getMonthlyColumns =  function (month) {
-    temp = month.clone()
+var getMonthlyColumns =  function (date) {
+    date = date.startOf('month')
+    temp = date.clone()
     console.log(temp.format("DD/MM/YY"))
     columns = []
     firstWeek = temp.isoWeek()
     temp.add(1,'months').subtract(1,'day')
     lastWeek =  temp.isoWeek()
-    temp = month.clone()
+    temp = date.clone()
     numberOfWeeks = lastWeek - firstWeek +1
 
     console.log(firstWeek + ' '+ lastWeek)
@@ -30,12 +31,12 @@ var getMonthlyColumns =  function (month) {
         }
         // if is the first week then the column from the first day of month
         if(i==1)
-            from = month.format('DD/MM')
+            from = date.format('DD/MM')
         else
             from = temp.startOf('isoWeek').format('DD/MM')
 
         if(i == numberOfWeeks)
-            to = month.endOf('month').format('DD/MM')
+            to = date.endOf('month').format('DD/MM')
         else
             to = temp.endOf('isoWeek').format('DD/MM')
 
@@ -64,7 +65,7 @@ var getMonthlyColumns =  function (month) {
 }
 
 
-var setMonthlyData =  function (criterion, dataView) {
+/*var setMonthlyData =  function (criterion, dataView) {
    
 
     db.gastos.find(criterion)
@@ -84,7 +85,7 @@ var setMonthlyData =  function (criterion, dataView) {
    
    
 
-}
+}*/
 function getWeeklyColumns(week) {
 
 }
@@ -104,6 +105,7 @@ function accountMovementFormatter(row, cell, value, columnDef, dataContext){
 }
 
 function setMonthlyBook(data, dataView){
+    data = data.startOf('month')
     var columns =  getMonthlyColumns(data.clone())
     var from = data.format("YYYY-MM-DD")
     var to = data.clone().add(1,'month').format("YYYY-MM-DD")
