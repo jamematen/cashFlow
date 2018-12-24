@@ -3,38 +3,46 @@
 var moment = require('moment')
 const db = require('./../data/db')
 
-var getMonthlyColumns =  function (y, mon) {
-    temp = moment(y).month(mon)
+var getMonthlyColumns =  function (month) {
+    temp = month.clone()
     console.log(temp.format("DD/MM/YY"))
     columns = []
     firstWeek = temp.isoWeek()
     temp.add(1,'months').subtract(1,'day')
     lastWeek =  temp.isoWeek()
-    temp = moment(y).month(mon)
+    temp = month.clone()
     numberOfWeeks = lastWeek - firstWeek +1
 
     console.log(firstWeek + ' '+ lastWeek)
-    //numberOfDays =    temp.daysInMonth()
-    temp.subtract(7,'days')
+    
     console.log(temp.format("DD/MM/YY"))
     for (i = 0; i < numberOfWeeks +1 ; i++) {
         col = {}
         var from,to
+
+        if(i==0){
+            col.name = 'Concepto: '
+            col.width = 250 
+            col.cssClass = "conceptoClass"
+            columns.push(col)
+            //temp.add(7,'days')
+            continue
+        }
         // if is the first week then the column from the first day of month
         if(i==1)
-            from = moment(y).month(mon).format('DD/MM')
+            from = month.format('DD/MM')
         else
             from = temp.startOf('isoWeek').format('DD/MM')
 
         if(i == numberOfWeeks)
-            to = moment(y).month(mon).endOf('month').format('DD/MM')
+            to = month.endOf('month').format('DD/MM')
         else
             to = temp.endOf('isoWeek').format('DD/MM')
 
-        name =  temp.add(7,'days').format('WW')
-        i == 0 ? col.name = 'Concepto: ':col.name = 'Del  ' +  from  +' al '+   to
-        i == 0 ? col.cssClass = "conceptoClass" : ""
-        i == 0 ? col.width = 250 : col.width = 150
+        name =  temp.format('W')
+        console.log('name = '+ name)
+        col.name = 'Del  ' +  from  +' al '+   to
+        col.width = 150
         col.field = name
         col.id = name
         col.resizable = true
@@ -48,6 +56,7 @@ var getMonthlyColumns =  function (y, mon) {
         
 
         columns.push(col)
+        temp.add(7,'days')
     }
 
     return columns
@@ -65,9 +74,9 @@ var setMonthlyData =  function (criterion, dataView) {
 
                 doc.Fecha = moment(doc.Fecha);
                 //console.log(doc.Fecha.format('WW'))
-                doc[doc.Fecha.format('WW')] = doc
+                doc[doc.Fecha.isoWeek()] = doc
             })
-            
+            console.log(docs)
             dataView.setItems(docs, "Id")
         })
 
@@ -94,5 +103,30 @@ function accountMovementFormatter(row, cell, value, columnDef, dataContext){
     return   value.Fecha.format('DD/MM') + ' ' +value.Notas+' '+value.Importe+'€' 
 }
 
-module.exports.getMonthlyColumns= getMonthlyColumns
-module.exports.setMonthlyData = setMonthlyData
+function setMonthlyBook(data, dataView){
+    var columns =  getMonthlyColumns(data.clone())
+    var from = data.format("YYYY-MM-DD")
+    var to = data.clone().add(1,'month').format("YYYY-MM-DD")
+    console.log(from +'  ' + to)
+
+    var criterion  = { $and: [{ "Fecha": { $gte: from } }, { "Fecha": { $lt: to } }] }
+
+    db.gastos.find(criterion)
+
+        .then((docs) => {
+            docs.map((doc) => {
+
+                doc.Fecha = moment(doc.Fecha);
+                //console.log(doc.Fecha.format('WW'))
+                doc[doc.Fecha.isoWeek()] = doc
+            })
+            console.log(docs)
+            dataView.setItems(docs, "Id")
+        })
+
+        .catch((err) => console.log(err))
+    
+        return columns
+}
+module.exports.setMonthlyBook= setMonthlyBook
+//module.exports.setMonthlyData = setMonthlyData

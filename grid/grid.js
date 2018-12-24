@@ -20,8 +20,8 @@ const moment = require('moment')
 
 
 const db = require('./../data/db')
-getMonthlyColumns = require('../model/accountingBook.js').getMonthlyColumns
-setMonthlyData = require('../model/accountingBook.js').setMonthlyData
+setMonthlyBook = require('../model/accountingBook.js').setMonthlyBook
+//setMonthlyData = require('../model/accountingBook.js').setMonthlyData
 
 
 //const gastos = require('./../data/gastos').gastos
@@ -85,7 +85,7 @@ function DateFormatter(rowIndex, cell, value, columnDef, grid, dataView) {
 $(function () {
 
 
-    col = getMonthlyColumns('2018', 9)
+    //col = getMonthlyColumns('2018', 8)
 
     //console.log(col)
 
@@ -97,14 +97,14 @@ $(function () {
 
 
     //var dataView = new Slick.Data.DataView();
-    var desde = moment("2018-10-1").format("YYYY-MM-DD")
-    var hasta = moment("2018-10-31").format("YYYY-MM-DD")
+    //var desde = moment("2018-9-1").format("YYYY-MM-DD")
+    //var hasta = moment("2018-10-1").format("YYYY-MM-DD")
 
-    var criterio = { $and: [{ "Fecha": { $gte: desde } }, { "Fecha": { $lt: hasta } }] }
+    //var criterio = { $and: [{ "Fecha": { $gte: desde } }, { "Fecha": { $lt: hasta } }] }
 
 
 
-    setMonthlyData(criterio, dataView)
+    var col = setMonthlyBook(moment("2018-9-1"), dataView)
 
 
 
