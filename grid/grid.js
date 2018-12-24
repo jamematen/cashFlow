@@ -85,7 +85,7 @@ function DateFormatter(rowIndex, cell, value, columnDef, grid, dataView) {
 $(function () {
 
 
-    col = getMonthlyColumns('2018', 3)
+    col = getMonthlyColumns('2018', 9)
 
     //console.log(col)
 
@@ -97,27 +97,15 @@ $(function () {
 
 
     //var dataView = new Slick.Data.DataView();
-    var desde = moment("2018-4-1").format("YYYY-MM-DD")
-    var hasta = moment("2018-5-1").format("YYYY-MM-DD")
+    var desde = moment("2018-10-1").format("YYYY-MM-DD")
+    var hasta = moment("2018-10-31").format("YYYY-MM-DD")
 
     var criterio = { $and: [{ "Fecha": { $gte: desde } }, { "Fecha": { $lt: hasta } }] }
 
-    /*db.gastos.find(criterio)
 
-        .then((docs) => {
-            docs.map((doc) => {
 
-                doc.Fecha = moment(doc.Fecha);
-            })
+    setMonthlyData(criterio, dataView)
 
-            //db.gastos2.insert(docs)
-            dataView.setItems(docs, "Id")
-        })
-
-        .catch((err) => console.log(err))*/
-
-    setMonthlyData(criterio,dataView)
-        
 
 
 
@@ -202,7 +190,7 @@ function groupByConcepto(dataView) {
     dataView.setGrouping({
         getter: "Concepto",
         formatter: function (g) {
-            return "Concepto:  " + g.value + "  <span style='color:green'>(" + g.count + " items)</span>";
+            return "Concepto:  " + g.value + "  <span style='color:green'>" + g.count + "</span>";
         },
         aggregators: [
             //new Slick.Data.Aggregators.Avg("percentComplete"),

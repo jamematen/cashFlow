@@ -4,22 +4,35 @@ var moment = require('moment')
 const db = require('./../data/db')
 
 var getMonthlyColumns =  function (y, mon) {
-    year = moment(y).month(mon)
+    temp = moment(y).month(mon)
+    console.log(temp.format("DD/MM/YY"))
     columns = []
-    firstWeek = year.week()-2
-    year.add(1,'months')
-    lastWeek = year.week()+1
-    year = moment(y).month(mon)
-    numberOfWeeks = lastWeek - firstWeek 
+    firstWeek = temp.isoWeek()
+    temp.add(1,'months').subtract(1,'day')
+    lastWeek =  temp.isoWeek()
+    temp = moment(y).month(mon)
+    numberOfWeeks = lastWeek - firstWeek +1
 
     console.log(firstWeek + ' '+ lastWeek)
-    //numberOfDays = year.daysInMonth()
-    year.subtract(14,'days')
-
-    for (i = 0; i < numberOfWeeks; i++) {
+    //numberOfDays =    temp.daysInMonth()
+    temp.subtract(7,'days')
+    console.log(temp.format("DD/MM/YY"))
+    for (i = 0; i < numberOfWeeks +1 ; i++) {
         col = {}
-        name = year.add(7,'days').format('WW')
-        i == 0 ? col.name = 'Concepto: ':col.name = 'Del  ' + year.startOf('isoWeek').format('DD/MM') +' al '+ year.endOf('isoWeek').format('DD/MM')
+        var from,to
+        // if is the first week then the column from the first day of month
+        if(i==1)
+            from = moment(y).month(mon).format('DD/MM')
+        else
+            from = temp.startOf('isoWeek').format('DD/MM')
+
+        if(i == numberOfWeeks)
+            to = moment(y).month(mon).endOf('month').format('DD/MM')
+        else
+            to = temp.endOf('isoWeek').format('DD/MM')
+
+        name =  temp.add(7,'days').format('WW')
+        i == 0 ? col.name = 'Concepto: ':col.name = 'Del  ' +  from  +' al '+   to
         i == 0 ? col.cssClass = "conceptoClass" : ""
         i == 0 ? col.width = 250 : col.width = 150
         col.field = name
@@ -78,7 +91,7 @@ function accountMovementFormatter(row, cell, value, columnDef, dataContext){
     if (value == null || value == "")
             return "";
 
-    return   value.Notas+' '+value.Importe+'€' 
+    return   value.Fecha.format('DD/MM') + ' ' +value.Notas+' '+value.Importe+'€' 
 }
 
 module.exports.getMonthlyColumns= getMonthlyColumns
