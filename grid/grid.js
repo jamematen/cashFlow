@@ -33,7 +33,7 @@ setMonthlyBook = require('../model/accountingBook.js').setMonthlyBook
 
 
 
-var columns = [
+/*var columns = [
     {
         name: "Id", field: "Id", id: "Id", width: 60, resizable: false
         , headerCssClass: "prKeyHeadColumn", cssClass: "numericCell", editor: Slick.Editors.Text
@@ -61,7 +61,7 @@ var columns = [
         name: "Notas", field: "Notas", id: "Notas", width: 110, minWidth: 80, maxWidth: 170
         , headerCssClass: "headColumn", cssClass: "numericCell", editor: Slick.Editors.Text, sortable: true
     }
-];
+];*/
 
 
 
@@ -194,17 +194,40 @@ function groupByConcepto(dataView) {
         },
         aggregators: [
             //new Slick.Data.Aggregators.Avg("percentComplete"),
-            new Slick.Data.Aggregators.Sum("Importe")
+            
+            //new Slick.Data.Aggregators.Sum("Importe"),
+            new mySumAggregator("Concepto")
         ],
+        collapsed:true,
         aggregateCollapsed: true,
-        lazyTotalsCalculation: false
+        lazyTotalsCalculation: true
     });
 }
 
-function sumTotalsFormatter(totals, columnDef) {
-    var val = totals.sum && totals.sum[columnDef.field];
-    if (val != null) {
-        return "total: " + ((Math.round(parseFloat(val) * 100) / 100));
+function mySumAggregator(field) {
+    this.field_ = field;
+    
+    this.init = function () {
+      this.sum_ = null;
+    };
+
+    this.accumulate = function (item) {
+        //console.log('el val es '+ item.Importe)
+      //var obj = item[this.field_];
+      var val = item.Importe
+      
+      if (val != null && val !== "" && val !== NaN) {
+        this.sum_ += parseFloat(val);
+        
+      }
+    };
+
+    this.storeResult = function (groupTotals) {
+        console.log('est '+groupTotals.constructor.name)
+      if (!groupTotals.sum) {
+        groupTotals.sum = {};
+      }
+      groupTotals.sum[this.field_] = this.sum_;
+      console.log(this.field_)
     }
-    return "";
-}
+  }

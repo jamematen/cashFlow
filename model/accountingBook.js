@@ -3,46 +3,54 @@
 var moment = require('moment')
 const db = require('./../data/db')
 
-var getMonthlyColumns =  function (date) {
+var getMonthlyColumns = function (date) {
     date = date.startOf('month')
     temp = date.clone()
     console.log(temp.format("DD/MM/YY"))
     columns = []
     firstWeek = temp.isoWeek()
-    temp.add(1,'months').subtract(1,'day')
-    lastWeek =  temp.isoWeek()
+    temp.add(1, 'months').subtract(1, 'day')
+    lastWeek = temp.isoWeek()
     temp = date.clone()
-    numberOfWeeks = lastWeek - firstWeek +1
+    numberOfWeeks = lastWeek - firstWeek + 1
 
-    console.log(firstWeek + ' '+ lastWeek)
-    
+    console.log(firstWeek + ' ' + lastWeek)
+
     console.log(temp.format("DD/MM/YY"))
-    for (i = 0; i < numberOfWeeks +1 ; i++) {
+    for (i = 0; i < numberOfWeeks + 1; i++) {
         col = {}
-        var from,to
+        var from, to
 
-        if(i==0){
+        if (i == 0) {
+            col.field = 'Concepto'
             col.name = 'Concepto: '
-            col.width = 250 
+            col.width = 250
             col.cssClass = "conceptoClass"
+            col.groupTotalsFormatter = sumTotalsFormatter
+            col.formatter = conceptFormatter
             columns.push(col)
             //temp.add(7,'days')
+
+
             continue
         }
+
+        
+
         // if is the first week then the column from the first day of month
-        if(i==1)
+        if (i == 1)
             from = date.format('DD/MM')
         else
             from = temp.startOf('isoWeek').format('DD/MM')
 
-        if(i == numberOfWeeks)
+        if (i == numberOfWeeks)
             to = date.endOf('month').format('DD/MM')
         else
             to = temp.endOf('isoWeek').format('DD/MM')
 
-        name =  temp.format('W')
-        console.log('name = '+ name)
-        col.name = 'Del  ' +  from  +' al '+   to
+        name = temp.format('W')
+        console.log('name = ' + name)
+        col.name = 'Del  ' + from + ' al ' + to
         col.width = 150
         col.field = name
         col.id = name
@@ -51,13 +59,13 @@ var getMonthlyColumns =  function (date) {
         //col.cssClass = "numericCell"
         col.editor = Slick.Editors.Text
         col.sortable = false
-        col.groupTotalsFormatter = sumTotalsFormatter
+        //col.groupTotalsFormatter = sumTotalsFormatter
         col.formatter = accountMovementFormatter
-        
-        
+
+
 
         columns.push(col)
-        temp.add(7,'days')
+        temp.add(7, 'days')
     }
 
     return columns
@@ -65,27 +73,7 @@ var getMonthlyColumns =  function (date) {
 }
 
 
-/*var setMonthlyData =  function (criterion, dataView) {
-   
 
-    db.gastos.find(criterion)
-
-        .then((docs) => {
-            docs.map((doc) => {
-
-                doc.Fecha = moment(doc.Fecha);
-                //console.log(doc.Fecha.format('WW'))
-                doc[doc.Fecha.isoWeek()] = doc
-            })
-            console.log(docs)
-            dataView.setItems(docs, "Id")
-        })
-
-        .catch((err) => console.log(err))
-   
-   
-
-}*/
 function getWeeklyColumns(week) {
 
 }
@@ -95,23 +83,31 @@ function sumTotalsFormatter(totals, columnDef) {
     if (val != null) {
         return "total: " + ((Math.round(parseFloat(val) * 100) / 100));
     }
-    return "";
+    return "hhhh";
 }
-function accountMovementFormatter(row, cell, value, columnDef, dataContext){
+function accountMovementFormatter(row, cell, value, columnDef, dataContext) {
     if (value == null || value == "")
-            return "";
+        return "";
 
-    return   value.Fecha.format('DD/MM') + ' ' +value.Notas+' '+value.Importe+'€' 
+    return value.Fecha.format('DD/MM') + ' ' + value.Notas + ' ' + value.Importe + '€'
+}
+function conceptFormatter(row, cell, value, columnDef, dataContext) {
+
+    return "";
+
+
 }
 
-function setMonthlyBook(data, dataView){
-    data = data.startOf('month')
-    var columns =  getMonthlyColumns(data.clone())
-    var from = data.format("YYYY-MM-DD")
-    var to = data.clone().add(1,'month').format("YYYY-MM-DD")
-    console.log(from +'  ' + to)
 
-    var criterion  = { $and: [{ "Fecha": { $gte: from } }, { "Fecha": { $lt: to } }] }
+
+function setMonthlyBook(data, dataView) {
+    data = data.startOf('month')
+    var columns = getMonthlyColumns(data.clone())
+    var from = data.format("YYYY-MM-DD")
+    var to = data.clone().add(1, 'month').format("YYYY-MM-DD")
+    console.log(from + '  ' + to)
+
+    var criterion = { $and: [{ "Fecha": { $gte: from } }, { "Fecha": { $lt: to } }] }
 
     db.gastos.find(criterion)
 
@@ -121,14 +117,18 @@ function setMonthlyBook(data, dataView){
                 doc.Fecha = moment(doc.Fecha);
                 //console.log(doc.Fecha.format('WW'))
                 doc[doc.Fecha.isoWeek()] = doc
+
             })
             console.log(docs)
             dataView.setItems(docs, "Id")
         })
 
         .catch((err) => console.log(err))
-    
-        return columns
+
+    return columns
 }
-module.exports.setMonthlyBook= setMonthlyBook
+
+
+
+module.exports.setMonthlyBook = setMonthlyBook
 //module.exports.setMonthlyData = setMonthlyData
