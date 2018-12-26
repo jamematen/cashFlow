@@ -33,35 +33,7 @@ setMonthlyBook = require('../model/accountingBook.js').setMonthlyBook
 
 
 
-/*var columns = [
-    {
-        name: "Id", field: "Id", id: "Id", width: 60, resizable: false
-        , headerCssClass: "prKeyHeadColumn", cssClass: "numericCell", editor: Slick.Editors.Text
-        , sortable: true
-    },
-    {
-        name: "Fecha", field: "Fecha", id: "Fecha", width: 120, resizable: true, formatter: DateFormatter
-        , headerCssClass: "headColumn", editor: Slick.Editors.Data
-        , sortable: true
-    },
-    {
-        name: "Importe", field: "Importe", id: "Importe", width: 100, minWidth: 50, maxWidth: 200
-        , headerCssClass: "headColumn", editor: Slick.Editors.Integer, formatter: Slick.Formatters.CurrencyFormatter
-        , sortable: true, groupTotalsFormatter: sumTotalsFormatter
-    },
-    {
-        name: "Concepto", field: "Concepto", id: "Concepto", width: 80, minWidth: 60, maxWidth: 120
-        , headerCssClass: "headColumn", editor: Slick.Editors.Text
-    },
-    {
-        name: "Cuenta", field: "Cuenta", id: "Cuenta", width: 110, minWidth: 80, maxWidth: 170
-        , headerCssClass: "headColumn", cssClass: "numericCell", editor: Slick.Editors.Text, sortable: true
-    },
-    {
-        name: "Notas", field: "Notas", id: "Notas", width: 110, minWidth: 80, maxWidth: 170
-        , headerCssClass: "headColumn", cssClass: "numericCell", editor: Slick.Editors.Text, sortable: true
-    }
-];*/
+
 
 
 
@@ -70,7 +42,8 @@ var options = {
     enableAsyncPostRender: true,
     asyncPostRenderDelay: 10,
     multiColumnSort: true,
-    syncColumnCellResize: true
+    syncColumnCellResize: true,
+    fullWidthRows :true
 };
 
 
@@ -103,8 +76,10 @@ $(function () {
     //var criterio = { $and: [{ "Fecha": { $gte: desde } }, { "Fecha": { $lt: hasta } }] }
 
 
+    var defaultDate = moment("2018-1-1")
+    var currentDate = defaultDate.clone()
 
-    var col = setMonthlyBook(moment("2018-1-15"), dataView)
+    var col = setMonthlyBook(defaultDate, dataView)
 
 
 
@@ -162,27 +137,22 @@ $(function () {
 
 
 
-    $("[name=pagesize]").click(function () {
-        dataView.setPagingOptions(
-            {
-                pageSize: parseInt($("[name=pagesize]:checked").val())
-                , pageNum: 0
-            });
-    });
+    
 
     $("#btnPrevious").click(function () {
-        var toPage = dataView.getPagingInfo().pageNum - 1;
-        if (toPage < 0) toPage = 0;
-        dataView.setPagingOptions({ pageNum: toPage });
+       currentDate.subtract('month',1)
+       if(currentDate.isBefore(defaultDate)) currentDate = defaultDate.clone()
+       col = setMonthlyBook(currentDate, dataView)
+       grid.setColumns(col)
     });
 
     $("#btnNext").click(function () {
-        var toPage = dataView.getPagingInfo().pageNum + 1;
-        var total = dataView.getPagingInfo().totalPages;
-        if (toPage >= total) toPage = total - 1;
-        dataView.setPagingOptions({ pageNum: toPage });
+        currentDate.add('month',1)
+       
+        col = setMonthlyBook(currentDate, dataView)
+        grid.setColumns(col)
     })
-    var pager = new Slick.Controls.Pager(dataView, grid, $("#SlickPager"));
+    
 });
 
 
@@ -223,7 +193,7 @@ function mySumAggregator(field) {
     };
 
     this.storeResult = function (groupTotals) {
-        console.log('est '+groupTotals.constructor.name)
+        
       if (!groupTotals.sum) {
         groupTotals.sum = {};
       }
