@@ -17,26 +17,13 @@ require('../node_modules/slickgrid/plugins/slick.cellselectionmodel.js')
 require('../node_modules/slickgrid/plugins/slick.cellrangeselector.js')
 require('../node_modules/slickgrid/plugins/slick.cellrangedecorator.js')
 const moment = require('moment')
-
-
 const db = require('./../data/db')
-setMonthlyBook = require('../model/accountingBook.js').setMonthlyBook
-//setMonthlyData = require('../model/accountingBook.js').setMonthlyData
 
 
-//const gastos = require('./../data/gastos').gastos
+//--------------------------------------------Options------------------------------------------------------------------
 
 
-//var getSubcatNameFromBBDD = datasource.getSubcatNameFromBBDD
-
-
-
-
-
-
-
-
-
+//-----Option for grid
 var options = {
     editable: true,
     enableAsyncPostRender: true,
@@ -46,10 +33,37 @@ var options = {
     fullWidthRows :true
 };
 
+//----------------------------------------------Formatters---------------------------------------------------------------
 
+
+//--------------------------Formatter for moment date
 function DateFormatter(rowIndex, cell, value, columnDef, grid, dataView) {
     if (value == null || value === "") { return "-"; }
     return moment(value).format("YYYY-MM-DD")
+}
+
+function sumTotalsFormatter(totals, columnDef) {
+    var val = totals.sum && totals.sum[columnDef.field];
+    if (val != null) {
+        return "total: " + ((Math.round(parseFloat(val) * 100) / 100));
+    }
+    return "";
+}
+
+
+function accountMovementFormatter(row, cell, value, columnDef, dataContext) {
+    if (value == null || value == "")
+        return "";
+
+    return value.Fecha.format('DD/MM') + ' ' + value.Notas + ' ' + value.Importe + '€'
+}
+
+
+function conceptFormatter(row, cell, value, columnDef, dataContext) {
+
+    return "";
+
+
 }
 
 
@@ -58,35 +72,30 @@ function DateFormatter(rowIndex, cell, value, columnDef, grid, dataView) {
 $(function () {
 
 
-    //col = getMonthlyColumns('2018', 8)
-
-    //console.log(col)
-
     var groupItemMetadataProvider = new Slick.Data.GroupItemMetadataProvider();
+    
     dataView = new Slick.Data.DataView({
         groupItemMetadataProvider: groupItemMetadataProvider,
         inlineFilters: true
     })
 
 
-    //var dataView = new Slick.Data.DataView();
-    //var desde = moment("2018-9-1").format("YYYY-MM-DD")
-    //var hasta = moment("2018-10-1").format("YYYY-MM-DD")
-
-    //var criterio = { $and: [{ "Fecha": { $gte: desde } }, { "Fecha": { $lt: hasta } }] }
-
+   
 
     var defaultDate = moment("2018-1-1")
     var currentDate = defaultDate.clone()
 
-    var col = setMonthlyBook(defaultDate, dataView)
+    var columns = getMonthlyColumns(defaultDate)
+
+    setMonthlyBook(defaultDate, dataView)
 
 
 
 
     groupByConcepto(dataView)
+   
 
-    var grid = new Slick.Grid("#FirstGrid", dataView, col, options);
+    var grid = new Slick.Grid("#FirstGrid", dataView, columns, options);
     // register the group item metadata provider to add expand/collapse group handlers
     grid.registerPlugin(groupItemMetadataProvider);
     grid.setSelectionModel(new Slick.CellSelectionModel());
@@ -142,19 +151,47 @@ $(function () {
     $("#btnPrevious").click(function () {
        currentDate.subtract('month',1)
        if(currentDate.isBefore(defaultDate)) currentDate = defaultDate.clone()
-       col = setMonthlyBook(currentDate, dataView)
-       grid.setColumns(col)
+       columns = setMonthlyBook(currentDate, dataView)
+       grid.setColumns(columns)
     });
 
     $("#btnNext").click(function () {
         currentDate.add('month',1)
        
-        col = setMonthlyBook(currentDate, dataView)
-        grid.setColumns(col)
+        columns = setMonthlyBook(currentDate, dataView)
+        grid.setColumns(columns)
     })
     
 });
 
+
+function setMonthlyBook(date, dataView) {
+    date = date.startOf('month')
+    //var columns = getMonthlyColumns(date.clone())
+    var from = date.format("YYYY-MM-DD")
+    var to = date.clone().add(1, 'month').format("YYYY-MM-DD")
+    console.log(from + '  ' + to)
+
+    var criterion = { $and: [{ "Fecha": { $gte: from } }, { "Fecha": { $lt: to } }] }
+
+    db.gastos.find(criterion)
+
+        .then((docs) => {
+            docs.map((doc) => {
+
+                doc.Fecha = moment(doc.Fecha);
+                //console.log(doc.Fecha.format('WW'))
+                doc[doc.Fecha.isoWeek()] = doc
+
+            })
+            console.log(docs)
+            dataView.setItems(docs, "Id")
+        })
+
+        .catch((err) => console.log(err))
+
+    //return columns
+}
 
 function groupByConcepto(dataView) {
     dataView.setGrouping({
@@ -201,3 +238,70 @@ function mySumAggregator(field) {
       console.log(this.field_)
     }
   }
+
+
+  var getMonthlyColumns = function (date) {
+    date = date.startOf('month')
+    temp = date.clone()
+    
+    columns = []
+    firstWeek = temp.isoWeek()
+    temp.add(1, 'months').subtract(1, 'day')
+    lastWeek = temp.isoWeek()
+    temp = date.clone()
+    numberOfWeeks = lastWeek - firstWeek + 1
+
+    
+    for (i = 0; i < numberOfWeeks + 1; i++) {
+        column = {}
+        var from, to
+
+        if (i == 0) {
+            column.field = 'Concepto'
+            column.name = 'Concepto: '
+            column.width = 250
+            column.cssClass = "conceptoClass"
+            column.groupTotalsFormatter = sumTotalsFormatter
+            column.formatter = conceptFormatter
+            columns.push(column)
+            
+            continue
+        }
+
+        
+
+        // if is the first week then the columns from the first day of month
+        if (i == 1)
+            from = date.format('DD/MM')
+        else
+            from = temp.startOf('isoWeek').format('DD/MM')
+
+        if (i == numberOfWeeks)
+            to = date.endOf('month').format('DD/MM')
+        else
+            to = temp.endOf('isoWeek').format('DD/MM')
+
+        name = temp.format('W')
+        console.log('name = ' + name)
+        columns.name = 'Del  ' + from + ' al ' + to
+        columns.width = 150
+        columns.field = name
+        columns.id = name
+        columns.resizable = true
+        columns.headerCssClass = "prKeyHeadColumn"
+        //columns.cssClass = "numericCell"
+        columns.editor = Slick.Editors.Text
+        columns.sortable = false
+        //columns.groupTotalsFormatter = sumTotalsFormatter
+        columns.formatter = accountMovementFormatter
+
+
+
+        columns.push(columns)
+        temp.add(7, 'days')
+    }
+
+    return columns
+
+}
+
