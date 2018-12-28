@@ -41,6 +41,7 @@ $(function () {
     var columns = []
     var groupItemMetadataProvider = new Slick.Data.GroupItemMetadataProvider();
     
+    $('#Fecha').text(currentDate.format('MM-YYYY'))
     dataView = new Slick.Data.DataView({
         groupItemMetadataProvider: groupItemMetadataProvider,
         inlineFilters: true
@@ -119,12 +120,14 @@ $(function () {
 
               
        book.setMonthlyBook(grid,currentDate)
+       $('#Fecha').text(currentDate.format('MM-YYYY'))
     });
 
     $("#btnNext").click(function () {
         currentDate.add('month',1)
        
         book.setMonthlyBook(grid,currentDate)
+        $('#Fecha').text(currentDate.format('MM-YYYY'))
     })
     
 });

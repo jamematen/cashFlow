@@ -7,10 +7,11 @@ book.setMonthlyBook = function (grid, date) {
 
     date = date.startOf('month')
     columns = getMonthlyColumns(date.clone())
+    console.log('columns =' + columns) 
     var from = date.format("YYYY-MM-DD")
     var to = date.clone().add(1, 'month').format("YYYY-MM-DD")
     console.log(from + '  ' + to)
-
+    
     var criterion = { $and: [{ "Fecha": { $gte: from } }, { "Fecha": { $lt: to } }] }
 
     db.gastos.find(criterion)
@@ -30,7 +31,7 @@ book.setMonthlyBook = function (grid, date) {
         .catch((err) => console.log(err))
 
     //return columns
-
+        console.log('estoy aqui'+ columns[0].name)
     grid.setColumns(columns)
     grid.setData(dataView)
     //console.log(book.aggregators)
@@ -47,8 +48,10 @@ var getMonthlyColumns = function (dat) {
     lastWeek = temp.isoWeek()
     temp = date.clone()
     numberOfWeeks = lastWeek - firstWeek + 1
+    if(numberOfWeeks < 1)
+     numberOfWeeks =+ 52
     book.aggregators = []
-
+    console.log('now= '+numberOfWeeks)
     for (i = 0; i < numberOfWeeks + 1; i++) {
         column = {}
 
@@ -167,7 +170,7 @@ function mySumAggregator(field) {
 
 
             var val = item.Importe
-            console.log('Field ' + this.field_ + ' VAL ' + val + ' ')
+            //console.log('Field ' + this.field_ + ' VAL ' + val + ' ')
 
             if (val != null && val !== "" && val !== NaN) {
                 this.sum_ += parseFloat(val);
