@@ -4,7 +4,7 @@ const moment = require('moment')
 book = {}
 book.aggregators = []
 book.setMonthlyBook = function (grid, date) {
-   
+
     date = date.startOf('month')
     columns = getMonthlyColumns(date.clone())
     var from = date.format("YYYY-MM-DD")
@@ -23,7 +23,7 @@ book.setMonthlyBook = function (grid, date) {
                 doc[doc.Fecha.isoWeek()] = doc
 
             })
-            console.log(docs)
+            //console.log(docs)
             dataView.setItems(docs, "Id")
         })
 
@@ -33,8 +33,8 @@ book.setMonthlyBook = function (grid, date) {
 
     grid.setColumns(columns)
     grid.setData(dataView)
-    console.log(book.aggregators)
-    groupByConcepto(dataView,book.aggregators)
+    //console.log(book.aggregators)
+    groupByConcepto(dataView, book.aggregators)
 }
 
 var getMonthlyColumns = function (dat) {
@@ -47,11 +47,11 @@ var getMonthlyColumns = function (dat) {
     lastWeek = temp.isoWeek()
     temp = date.clone()
     numberOfWeeks = lastWeek - firstWeek + 1
-    book.aggregators =[]
-    
+    book.aggregators = []
+
     for (i = 0; i < numberOfWeeks + 1; i++) {
         column = {}
-        
+
         var from, to
 
         if (i == 0) {
@@ -63,11 +63,11 @@ var getMonthlyColumns = function (dat) {
             column.formatter = conceptFormatter
             book.aggregators.push(new mySumAggregator("Concepto"))
             columns.push(column)
-            
+
             continue
         }
 
-        
+
 
         // if is the first week then the columns from the first day of month
         if (i == 1)
@@ -80,7 +80,7 @@ var getMonthlyColumns = function (dat) {
         else
             to = temp.endOf('isoWeek').format('DD/MM')
 
-        console.log('from = ' + from + 'to = '+ to)
+        console.log('from = ' + from + 'to = ' + to)
         name = temp.format('W')
         console.log('name = ' + name)
         column.name = 'Del  ' + from + ' al ' + to
@@ -97,6 +97,7 @@ var getMonthlyColumns = function (dat) {
 
 
         book.aggregators.push(new mySumAggregator(name))
+        //console.log(book.aggregators)
         columns.push(column)
         temp.add(7, 'days')
     }
@@ -136,7 +137,7 @@ function accountMovementFormatter(row, cell, value, columnDef, dataContext) {
     return value.Fecha.format('DD/MM') + ' ' + value.Notas + ' ' + value.Importe + '€'
 }
 
-function groupByConcepto(dataView,aggr) {
+function groupByConcepto(dataView, aggr) {
     dataView.setGrouping({
         getter: "Concepto",
         formatter: function (g) {
@@ -146,37 +147,47 @@ function groupByConcepto(dataView,aggr) {
            
             new mySumAggregator("Concepto")
         ]*/,
-        collapsed:true,
+        collapsed: true,
         aggregateCollapsed: true,
         lazyTotalsCalculation: true
     });
 }
 function mySumAggregator(field) {
     this.field_ = field;
-    
+
     this.init = function () {
-      this.sum_ = null;
+        this.sum_ = null;
     };
 
     this.accumulate = function (item) {
-        //console.log('el val es '+ item.Importe)
-      //var obj = item[this.field_];
-      var val = item.Importe
-      
-      if (val != null && val !== "" && val !== NaN) {
-        this.sum_ += parseFloat(val);
-        
-      }
-    };
 
-    this.storeResult = function (groupTotals) {
-        
-      if (!groupTotals.sum) {
-        groupTotals.sum = {};
-      }
-      groupTotals.sum[this.field_] = this.sum_;
-      console.log(this.field_)
+
+        if (this.field_ == 'Concepto' || item[this.field_] != undefined) {
+
+
+
+            var val = item.Importe
+            console.log('Field ' + this.field_ + ' VAL ' + val + ' ')
+
+            if (val != null && val !== "" && val !== NaN) {
+                this.sum_ += parseFloat(val);
+
+            }
+        }
     }
-  }
 
-module.exports = book
+
+        this.storeResult = function (groupTotals) {
+
+            if (!groupTotals.sum) {
+                groupTotals.sum = {};
+            }
+            groupTotals.sum[this.field_] = this.sum_;
+
+        }
+    }
+
+
+
+
+    module.exports = book
